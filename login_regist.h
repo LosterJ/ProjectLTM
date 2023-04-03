@@ -1,15 +1,15 @@
 typedef struct node_User{
     char username[40];
     char password[50];
-    int status;
+    int point;
     struct node_User *pNext;
 } NODE_USER;
 
-NODE_USER* createNode(char* username,char* password,int status){
+NODE_USER* createNode(char* username,char* password,int point){
     NODE_USER *newNode=(NODE_USER*)malloc(sizeof(NODE_USER));
     strcpy(newNode->username,username);
     strcpy(newNode->password,password);
-    newNode->status = status;
+    newNode->point = point;
     newNode->pNext = NULL;
     return newNode;
 }
@@ -23,12 +23,12 @@ NODE_USER* loadfileUser(char *filename){
     }
     do {
         char username[30], password[30];
-        int status;
-        fscanf(fptr,"%s %s %d",username,password,&status);
+        int point;
+        fscanf(fptr,"%s %s %d",username,password,&point);
         if(head_User==NULL){
-            head_User=createNode(username,password,status);
+            head_User=createNode(username,password,point);
         } else {
-            newNode = createNode(username,password,status);
+            newNode = createNode(username,password,point);
             newNode->pNext = head_User;
             head_User=newNode;
         }
@@ -43,10 +43,10 @@ void changefile(NODE_USER* head){
         printf("Change file error!!!"); return;
     }
     while(NULL!=head){
-        fprintf(fptr,"%s %s %d\n\n",head->username,head->password,head->status);
+        fprintf(fptr,"%s %s %d\n\n",head->username,head->password,head->point);
         head = head->pNext;
         if (head->pNext == NULL){
-            fprintf(fptr,"%s %s %d",head->username,head->password,head->status);
+            fprintf(fptr,"%s %s %d",head->username,head->password,head->point);
             break;
         }
     }

@@ -13,10 +13,13 @@
 
 void registToServer(int client_sock);
 void loginToServer(int client_sock);
-void menu(int client_sock);
+void menu_regist_login(int client_sock);
+void menu_play_showpoint(int client_sock);
 int receiveData(int s, char *buff, int flags);
 int sendData(int s, char *buff, int flags);
 void chuanhoaxau(char *chuoi);
+void playgame(int client_sock);
+void showpoint(int client_sock);
 
 int main(){
 	int client_sock;
@@ -39,10 +42,10 @@ int main(){
 	}
 
     //Step 4: Login or Register
-    menu(client_sock);
-
+    menu_regist_login(client_sock);
+    
     //Step 5: Game1
-		
+	menu_play_showpoint(client_sock);	
 
 
 	//Step n: Close socket
@@ -60,7 +63,7 @@ void chuanhoaxau(char *chuoi){
     }
 }
 
-void menu(int client_sock){
+void menu_regist_login(int client_sock){
     printf("-----------------------\n");
     printf("WELCOME TO 'AI LA TRIEU PHU'\n");
     printf("-----------------------\n");
@@ -69,7 +72,8 @@ void menu(int client_sock){
     int index;
     char enter;
     scanf("%d%c",&index,&enter);
-    int bytes_sent = send(client_sock, &index, sizeof(int), 0); if(bytes_sent < 0) perror("\nError: ");
+    int bytes_sent = send(client_sock, &index, sizeof(int), 0);
+    if(bytes_sent < 0) perror("\nError: ");
     switch (index){
         case 1: 
             printf("-----------------------\nRegister function\n");
@@ -77,6 +81,29 @@ void menu(int client_sock){
         case 2: 
             printf("-----------------------\nSign_in function\n");
             loginToServer(client_sock); break;
+        default: exit(1);
+    }
+}
+
+void menu_play_showpoint(int client_sock){
+    int index;
+    char enter;
+    //Choose play(1) or showpoint(2)
+    printf("-----------------------\n");
+    printf("1.Play game\t2.Ranking Board\n");
+    printf("Your choice (1-2, other to quit):");
+    scanf("%d%c",&index,&enter);
+    int bytes_sent = send(client_sock, &index, sizeof(int), 0);
+    if(bytes_sent < 0) perror("\nError: ");
+    switch (index){
+        case 1: 
+            printf("-----------------------\nPlay game\n");
+            playgame(client_sock); 
+            //menu_play_showpoint(client_sock); break;
+        case 2: 
+            printf("-----------------------\nRanking Board\n");
+            showpoint(client_sock);
+            //menu_play_showpoint(client_sock); break;
         default: exit(1);
     }
 }
@@ -163,4 +190,38 @@ int sendData(int s, char *buff, int flags){
 	if(n < 0)
 		perror("Error: ");
 	return n;
+}
+
+void playgame(int client_sock){
+    char quest[440];
+    char ans[20];
+    int index; char enter;
+    int indication_signal;
+    int bytes_sent;
+    //receive question and answer
+    int bytes_received = receiveData(client_sock,quest,0);
+	printf("Question: %s\n",quest);
+    bytes_received = receiveData(client_sock,ans,0);
+    printf("Ans1: %s\n",ans);
+    bytes_received = receiveData(client_sock,ans,0);
+    printf("Ans2: %s\n",ans);
+    bytes_received = receiveData(client_sock,ans,0);
+    printf("Ans3: %s\n",ans);
+    bytes_received = receiveData(client_sock,ans,0);
+    printf("Ans4: %s\n",ans);
+
+    printf("Your answer: ");
+    scanf("%d%c",&index,&enter);
+    bytes_sent = send(client_sock, &index, sizeof(int), 0);
+    if(bytes_sent < 0) perror("\nError: ");
+    //receive indication signal to know login success or fail
+	bytes_received = recv(client_sock, &indication_signal, sizeof(int), 0);
+	if (bytes_received < 0)	perror("\nError: ");
+    else if (indication_signal == 1){
+        printf("Your answer is correct. You have one more point\n");
+    } else printf("Your answer is not correct. Wish you lucky in the next\n");
+}
+
+void showpoint(int client_sock){
+
 }
